@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog - AI Software || Nexsas</title>
+    <link rel="stylesheet" href="assets/main.css">
+</head>
+<body class="bg-background-3 dark:bg-background-7">
+    
+    <main>
+        <section class="py-14 md:py-16 lg:py-[88px] xl:py-[100px]">
+            <div class="main-container">
+                <div class="text-center space-y-3 mb-10 md:mb-[70px]">
+                    <h2>
+                        Our recent
+                        <span class="text-primary-500 inline-block">news & insights</span>
+                    </h2>
+                    <p class="max-w-[738px] mx-auto">
+                        Our recent news and insights highlight the latest developments
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-7 md:gap-10" id="blog-container">
+                    <div class="col-span-12 text-center py-10">Loading blogs...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Inline script untuk memastikan bekerja
+        const BLOG_API_URL = 'https://adm.createch.id/getartikel';
+
+        function truncateText(text, maxLength) {
+            if (!text) return '';
+            const cleanText = text.replace(/<[^>]*>/g, '');
+            if (cleanText.length <= maxLength) return cleanText;
+            return cleanText.substring(0, maxLength) + '...';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'No date';
+            if (dateString.includes(',')) return dateString;
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        function createBlogCard(blog, delay = 0.3) {
+            const truncatedDescription = truncateText(blog.deskripsi || blog.description || '', 100);
+            const imageUrl = blog.gambar || 'images/ns-img-428.png';
+            const author = blog.penulis || 'Admin';
+            const date = formatDate(blog.tanggal || blog.date || '');
+            const category = blog.kategori || blog.category || 'Blog';
+            const title = blog.judul || blog.title || 'Untitled';
+            const slug = blog.slug || blog.id || '#';
+            
+            return `
+                <article class="group" style="opacity: 1;">
+                    <div class="bg-background-1 dark:bg-background-6 rounded-[20px] overflow-hidden relative md:min-h-[552px] min-h-[480px] scale-100 hover:scale-[102%] transition-transform duration-500">
+                        <figure class="md:min-h-[260px] md:max-h-[260px] max-w-full xl:max-w-[409px] overflow-hidden">
+                            <img src="${imageUrl}" alt="${title}" loading="lazy" class="w-full h-full object-cover" onerror="this.src='images/ns-img-428.png'" />
+                        </figure>
+                        <div class="px-4 py-6 md:p-6 space-y-6">
+                            <div class="flex items-center gap-2">
+                                <span class="badge badge-green">${category}</span>
+                                <span class="text-tagline-3 font-normal text-secondary/60 dark:text-accent/60 text-nowrap">${author}</span>
+                                <span class="w-[5px] h-[6px] bg-[#ECE8FF] rounded-full"></span>
+                                <time class="text-tagline-3 font-normal text-secondary/60 dark:text-accent/60 text-nowrap">${date}</time>
+                            </div>
+                            <div>
+                                <h3 class="font-normal sm:text-heading-5 text-tagline-1 mb-2">
+                                    <a href="ai-software-blog-details.html?slug=${slug}">
+                                        ${title}
+                                    </a>
+                                </h3>
+                                <p class="sm:text-tagline-1 text-tagline-2 font-normal text-secondary/60 dark:text-accent/60 line-clamp-2">
+                                    ${truncatedDescription}
+                                </p>
+                            </div>
+                            <div>
+                                <a href="ai-software-blog-details.html?slug=${slug}" class="btn btn-md btn-white hover:btn-primary dark:btn-transparent inline-block absolute bottom-6">
+                                    <span>Read more</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }
+
+        async function loadAllBlogs() {
+            console.log('=== LOADING BLOGS ===');
+            const container = document.getElementById('blog-container');
+            
+            if (!container) {
+                console.error('Container not found!');
+                return;
+            }
+
+            try {
+                container.innerHTML = '<div class="col-span-12 text-center py-10">Loading blogs...</div>';
+                console.log('Fetching from:', BLOG_API_URL);
+                
+                const response = await fetch(BLOG_API_URL);
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) throw new Error('Failed to fetch blogs');
+                
+                const result = await response.json();
+                console.log('API Result:', result);
+                
+                const blogs = result.data || result.blogs || result || [];
+                console.log('Blogs count:', blogs.length);
+                
+                if (blogs.length === 0) {
+                    container.innerHTML = '<div class="col-span-12 text-center py-10">No blogs available</div>';
+                    return;
+                }
+                
+                const html = blogs.map((blog, index) => 
+                    createBlogCard(blog, 0.3 + (index * 0.05))
+                ).join('');
+                
+                console.log('Generated HTML length:', html.length);
+                container.innerHTML = html;
+                console.log('✓ Blogs loaded successfully!');
+                
+            } catch (error) {
+                console.error('Error loading blogs:', error);
+                container.innerHTML = '<div class="col-span-12 text-center py-10 text-red-500">Failed to load blogs: ' + error.message + '</div>';
+            }
+        }
+
+        // Load blogs when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadAllBlogs);
+        } else {
+            loadAllBlogs();
+        }
+    </script>
+</body>
+</html>

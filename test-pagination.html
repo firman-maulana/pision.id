@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagination Test</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <style>
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 9999;
+            max-width: 300px;
+        }
+        .debug-panel div {
+            margin: 5px 0;
+            padding: 3px 0;
+            border-bottom: 1px solid #333;
+        }
+        .debug-panel div:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body class="bg-background-3 dark:bg-background-7">
+    
+    <div class="debug-panel">
+        <div><strong>📊 Pagination Debug</strong></div>
+        <div>Total Blogs: <span id="total-blogs">-</span></div>
+        <div>Current Page: <span id="current-page">-</span></div>
+        <div>Total Pages: <span id="total-pages">-</span></div>
+        <div>Showing: <span id="showing-range">-</span></div>
+        <div>Per Page: <span id="per-page">9</span></div>
+    </div>
+
+    <main>
+        <section class="py-14">
+            <div class="main-container">
+                <h1 class="text-center mb-10">Pagination Test</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-7 md:gap-10" id="blog-container">
+                    <div class="col-span-12 text-center py-10">Loading blogs...</div>
+                </div>
+                
+                <div class="pagination-container">
+                    <!-- Pagination will be loaded dynamically -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="assets/blog-api.js"></script>
+    <script>
+        // Update debug panel
+        function updateDebug() {
+            document.getElementById('total-blogs').textContent = allBlogsData.length;
+            document.getElementById('current-page').textContent = currentPage;
+            document.getElementById('total-pages').textContent = Math.ceil(allBlogsData.length / 9);
+            
+            const start = (currentPage - 1) * 9 + 1;
+            const end = Math.min(currentPage * 9, allBlogsData.length);
+            document.getElementById('showing-range').textContent = `${start}-${end}`;
+        }
+
+        // Monitor changes
+        const observer = new MutationObserver(() => {
+            if (typeof allBlogsData !== 'undefined' && allBlogsData.length > 0) {
+                updateDebug();
+            }
+        });
+
+        observer.observe(document.getElementById('blog-container'), {
+            childList: true,
+            subtree: true
+        });
+
+        // Force load
+        setTimeout(() => {
+            if (typeof loadAllBlogs === 'function') {
+                loadAllBlogs();
+            }
+        }, 500);
+    </script>
+</body>
+</html>

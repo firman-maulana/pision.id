@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Blog Test</title>
+    <link rel="stylesheet" href="assets/main.css">
+</head>
+<body class="bg-background-3 dark:bg-background-7">
+    <div class="main-container py-14">
+        <h1 class="text-center mb-10">Blog Test - Check Console</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-7 md:gap-10" id="blog-container">
+            <!-- Blog articles will be loaded dynamically from API -->
+        </div>
+    </div>
+
+    <script src="assets/blog-api.js"></script>
+    
+    <script>
+        // Additional debug
+        console.log('=== BLOG TEST PAGE ===');
+        console.log('Page loaded');
+        console.log('blog-container exists:', !!document.getElementById('blog-container'));
+        
+        // Force call after a delay to ensure everything is loaded
+        setTimeout(() => {
+            console.log('=== FORCE CALLING loadAllBlogs ===');
+            if (typeof loadAllBlogs === 'function') {
+                loadAllBlogs();
+            } else {
+                console.error('loadAllBlogs function not found!');
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

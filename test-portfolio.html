@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Test</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <style>
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 9999;
+            max-width: 300px;
+        }
+        .debug-panel div {
+            margin: 5px 0;
+            padding: 3px 0;
+            border-bottom: 1px solid #333;
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+    </style>
+</head>
+<body class="bg-background-3 dark:bg-background-7">
+    
+    <div class="debug-panel">
+        <div><strong>🎨 Portfolio Debug</strong></div>
+        <div id="status">Loading...</div>
+        <div>Total Items: <span id="total-items">-</span></div>
+        <div>API Status: <span id="api-status">-</span></div>
+    </div>
+
+    <main>
+        <section class="py-14">
+            <div class="main-container">
+                <h1 class="text-center mb-10">Portfolio Test</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="portfolio-container">
+                    <!-- Portfolio items will be loaded dynamically -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            console.log('=== PORTFOLIO TEST ===');
+            $('#status').html('<span class="success">Fetching...</span>');
+            
+            var settings = {
+                "url": "https://adm.createch.id/getportfolio",
+                "method": "GET",
+                "timeout": 0,
+            };
+            
+            $('#portfolio-container').html('<div class="col-span-3 text-center py-10">Loading portfolio...</div>');
+            
+            $.ajax(settings).done(function(response) {
+                console.log('Portfolio API response:', response);
+                $('#api-status').html('<span class="success">200 OK</span>');
+                
+                var portfolioData = response.data || response || [];
+                console.log('Portfolio count:', portfolioData.length);
+                $('#total-items').text(portfolioData.length);
+                
+                if (portfolioData.length === 0) {
+                    $('#status').html('<span class="error">No data</span>');
+                    $('#portfolio-container').html('<div class="col-span-3 text-center py-10">No portfolio items available</div>');
+                    return;
+                }
+                
+                $('#status').html('<span class="success">Rendering ' + portfolioData.length + ' items...</span>');
+                $('#portfolio-container').empty();
+                
+                portfolioData.forEach(function(item, index) {
+                    var delay = 0.3 + (index * 0.05);
+                    
+                    var newCard = `
+                        <div style="opacity: 1;"
+                            class="bg-background-2 dark:bg-background-5 space-y-6 p-6 rounded-[20px]">
+                            <figure>
+                                <img src="${item.thumbnail || 'images/default-portfolio.png'}" 
+                                     alt="${item.nama || 'Portfolio Item'}"
+                                     class="w-full h-full object-cover rounded-2xl" 
+                                     onerror="this.src='images/default-portfolio.png'" />
+                            </figure>
+                            <div>
+                                <h3 class="text-heading-6 sm:text-heading-5 mb-1 sm:mb-3 font-normal">
+                                    ${item.nama || 'Untitled Project'}
+                                </h3>
+                                <p class="text-sm text-secondary/60 dark:text-accent/60 mb-2">
+                                    <strong>Category:</strong> ${item.kategori || 'N/A'}<br>
+                                    <strong>Platform:</strong> ${item.platform || 'N/A'}
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    $('#portfolio-container').append(newCard);
+                });
+                
+                $('#status').html('<span class="success">✓ Complete!</span>');
+                console.log('✓ Portfolio loaded successfully!');
+                
+            }).fail(function(error) {
+                console.error('Error loading portfolio:', error);
+                $('#status').html('<span class="error">✗ Failed</span>');
+                $('#api-status').html('<span class="error">Error</span>');
+                $('#portfolio-container').html('<div class="col-span-3 text-center py-10 text-red-500">Failed to load portfolio</div>');
+            });
+        });
+    </script>
+</body>
+</html>

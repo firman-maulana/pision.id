@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Autoplay Test</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <link rel="stylesheet" href="vendor/swiper.min.css">
+    <style>
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 9999;
+            max-width: 300px;
+        }
+        .debug-panel div {
+            margin: 5px 0;
+            padding: 3px 0;
+            border-bottom: 1px solid #333;
+        }
+        .success { color: #4ade80; }
+        .info { color: #60a5fa; }
+    </style>
+</head>
+<body class="bg-background-3 dark:bg-background-7">
+    
+    <div class="debug-panel">
+        <div><strong>🎬 Autoplay Test</strong></div>
+        <div>Status: <span id="status">Loading...</span></div>
+        <div>Total Blogs: <span id="total-blogs">-</span></div>
+        <div>Current Slide: <span id="current-slide">-</span></div>
+        <div>Autoplay: <span id="autoplay-status" class="info">Waiting...</span></div>
+        <div>Next in: <span id="countdown">-</span>s</div>
+    </div>
+
+    <main>
+        <section class="py-14">
+            <div class="main-container">
+                <h1 class="text-center mb-10">Blog Autoplay Test</h1>
+                <p class="text-center mb-5 text-secondary/60 dark:text-accent/60">
+                    Slides should auto-advance every 4 seconds. Hover to pause.
+                </p>
+                
+                <div class="relative">
+                    <div class="swiper blog-article-swiper">
+                        <div class="swiper-wrapper" id="homepage-blog-container">
+                            <div class="swiper-slide">
+                                <div class="text-center py-10">Loading blogs...</div>
+                            </div>
+                        </div>
+                        <div class="pagination-bullets mt-5 md:mt-14"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="vendor/swiper.min.js"></script>
+    <script src="assets/blog-api.js"></script>
+    <script>
+        // Monitor swiper state
+        let countdownInterval;
+        
+        function startMonitoring() {
+            const swiperElement = document.querySelector('.blog-article-swiper');
+            
+            if (swiperElement && swiperElement.swiper) {
+                const swiper = swiperElement.swiper;
+                
+                // Update current slide
+                swiper.on('slideChange', function() {
+                    document.getElementById('current-slide').textContent = (swiper.realIndex + 1) + ' / ' + swiper.slides.length;
+                    console.log('Slide changed to:', swiper.realIndex + 1);
+                });
+                
+                // Monitor autoplay
+                swiper.on('autoplayStart', function() {
+                    document.getElementById('autoplay-status').innerHTML = '<span class="success">▶ Running</span>';
+                    console.log('Autoplay started');
+                });
+                
+                swiper.on('autoplayStop', function() {
+                    document.getElementById('autoplay-status').innerHTML = '<span style="color: #f87171;">⏸ Paused</span>';
+                    console.log('Autoplay stopped');
+                });
+                
+                // Countdown timer
+                let timeLeft = 4;
+                countdownInterval = setInterval(() => {
+                    if (swiper.autoplay.running) {
+                        timeLeft--;
+                        if (timeLeft <= 0) timeLeft = 4;
+                        document.getElementById('countdown').textContent = timeLeft;
+                    } else {
+                        document.getElementById('countdown').textContent = '-';
+                    }
+                }, 1000);
+                
+                // Initial state
+                document.getElementById('current-slide').textContent = '1 / ' + swiper.slides.length;
+                document.getElementById('status').innerHTML = '<span class="success">✓ Ready</span>';
+                document.getElementById('autoplay-status').innerHTML = '<span class="success">▶ Running</span>';
+                
+                console.log('Swiper monitoring started');
+                console.log('Autoplay config:', swiper.params.autoplay);
+            } else {
+                setTimeout(startMonitoring, 500);
+            }
+        }
+        
+        // Wait for blogs to load
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.target.id === 'homepage-blog-container') {
+                    const slides = document.querySelectorAll('#homepage-blog-container .swiper-slide');
+                    if (slides.length > 1) {
+                        document.getElementById('total-blogs').textContent = slides.length;
+                        setTimeout(startMonitoring, 200);
+                        observer.disconnect();
+                    }
+                }
+            });
+        });
+        
+        observer.observe(document.getElementById('homepage-blog-container'), {
+            childList: true,
+            subtree: true
+        });
+        
+        // Force load
+        setTimeout(() => {
+            if (typeof loadHomepageBlogs === 'function') {
+                loadHomepageBlogs();
+            }
+        }, 500);
+    </script>
+</body>
+</html>

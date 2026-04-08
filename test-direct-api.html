@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .card { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .loading { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>Direct API Test</h1>
+    <div id="status" class="status loading">Initializing...</div>
+    <div id="results"></div>
+
+    <script>
+        const API_URL = 'https://adm.createch.id/getartikel';
+        const statusEl = document.getElementById('status');
+        const resultsEl = document.getElementById('results');
+
+        console.log('Starting API test...');
+        statusEl.textContent = 'Fetching data from: ' + API_URL;
+
+        fetch(API_URL)
+            .then(response => {
+                console.log('Response received:', response);
+                statusEl.textContent = 'Response status: ' + response.status;
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Data received:', data);
+                statusEl.className = 'status success';
+                statusEl.textContent = '✓ Success! Received data';
+                
+                const blogs = data.data || data.blogs || data || [];
+                console.log('Blogs count:', blogs.length);
+                
+                resultsEl.innerHTML = '<h2>Found ' + blogs.length + ' blogs</h2>';
+                
+                blogs.forEach((blog, index) => {
+                    resultsEl.innerHTML += `
+                        <div class="card">
+                            <h3>${index + 1}. ${blog.judul || 'No title'}</h3>
+                            <p><strong>Author:</strong> ${blog.penulis || 'Unknown'}</p>
+                            <p><strong>Date:</strong> ${blog.tanggal || 'No date'}</p>
+                            <p><strong>Slug:</strong> ${blog.slug || 'No slug'}</p>
+                            <img src="${blog.gambar}" alt="${blog.judul}" style="max-width: 200px;" onerror="this.style.display='none'">
+                        </div>
+                    `;
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                statusEl.className = 'status error';
+                statusEl.textContent = '✗ Error: ' + error.message;
+                resultsEl.innerHTML = '<p>Check console for details</p>';
+            });
+    </script>
+</body>
+</html>

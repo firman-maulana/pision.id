@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visibility Test</title>
+    <link rel="stylesheet" href="assets/main.css">
+    <style>
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 9999;
+            max-width: 300px;
+        }
+        .debug-info div {
+            margin: 5px 0;
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+    </style>
+</head>
+<body class="bg-background-3 dark:bg-background-7">
+    
+    <div class="debug-info" id="debug">
+        <div>🔍 Debug Info</div>
+        <div id="status">Loading...</div>
+    </div>
+
+    <main>
+        <section class="py-14">
+            <div class="main-container">
+                <h1 class="text-center mb-10">Blog Visibility Test</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-7 md:gap-10" id="blog-container">
+                    <div class="col-span-12 text-center py-10">Loading blogs...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="assets/blog-api.js"></script>
+    <script>
+        const debugEl = document.getElementById('status');
+        
+        function updateDebug(msg, isError = false) {
+            const div = document.createElement('div');
+            div.className = isError ? 'error' : 'success';
+            div.textContent = msg;
+            debugEl.appendChild(div);
+            console.log(msg);
+        }
+
+        // Monitor blog loading
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.target.id === 'blog-container') {
+                    const articles = document.querySelectorAll('#blog-container article');
+                    updateDebug(`✓ ${articles.length} articles in DOM`);
+                    
+                    articles.forEach((article, i) => {
+                        const computed = window.getComputedStyle(article);
+                        const opacity = computed.opacity;
+                        const display = computed.display;
+                        const visibility = computed.visibility;
+                        
+                        if (i === 0) { // Check first article
+                            updateDebug(`Article 1: opacity=${opacity}, display=${display}, visibility=${visibility}`);
+                            
+                            if (opacity === '0' || display === 'none' || visibility === 'hidden') {
+                                updateDebug('⚠ Article hidden! Forcing visibility...', true);
+                                article.style.opacity = '1';
+                                article.style.display = 'block';
+                                article.style.visibility = 'visible';
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        observer.observe(document.getElementById('blog-container'), {
+            childList: true,
+            subtree: true
+        });
+
+        // Force load after delay
+        setTimeout(() => {
+            if (typeof loadAllBlogs === 'function') {
+                updateDebug('Calling loadAllBlogs...');
+                loadAllBlogs();
+            }
+        }, 500);
+    </script>
+</body>
+</html>
