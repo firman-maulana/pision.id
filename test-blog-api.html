@@ -12,109 +12,110 @@
             padding: 20px;
             background: #f5f5f5;
         }
-        .status {
-            padding: 15px;
+        h1 {
+            color: #333;
+        }
+        .blog-item {
+            background: white;
+            padding: 20px;
             margin-bottom: 20px;
             border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+        .blog-item img {
+            max-width: 300px;
+            height: auto;
+            border-radius: 4px;
         }
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .blog-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        .blog-card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .blog-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        .blog-content {
-            padding: 15px;
-        }
-        .blog-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
+        .blog-item h3 {
+            color: #2c3e50;
+            margin: 10px 0;
         }
         .blog-meta {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 10px;
-        }
-        .blog-desc {
+            color: #7f8c8d;
             font-size: 14px;
-            color: #333;
-            line-height: 1.5;
+            margin: 5px 0;
+        }
+        .blog-description {
+            color: #555;
+            line-height: 1.6;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
         }
     </style>
 </head>
 <body>
     <h1>Test Blog API Integration</h1>
-    <div id="status" class="status">Loading...</div>
-    <div id="blog-grid" class="blog-grid"></div>
+    <div id="status" class="loading">Loading blog data...</div>
+    <div id="blog-container"></div>
 
     <script>
         const API_URL = 'https://adm.createch.id/getartikel';
-        const statusEl = document.getElementById('status');
-        const gridEl = document.getElementById('blog-grid');
 
         async function testAPI() {
+            const statusDiv = document.getElementById('status');
+            const container = document.getElementById('blog-container');
+
             try {
-                statusEl.textContent = 'Fetching data from API...';
+                statusDiv.textContent = 'Fetching data from API...';
                 
                 const response = await fetch(API_URL);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
-                const result = await response.json();
-                const blogs = result.data || result.blogs || result || [];
-                
-                statusEl.className = 'status success';
-                statusEl.textContent = `✓ Success! Loaded ${blogs.length} blog articles from API`;
-                
-                if (blogs.length === 0) {
-                    gridEl.innerHTML = '<p>No blogs found</p>';
-                    return;
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                gridEl.innerHTML = blogs.map(blog => `
-                    <div class="blog-card">
-                        <img src="${blog.gambar || 'images/ns-img-428.png'}" 
-                             alt="${blog.judul || 'Blog'}"
-                             onerror="this.src='images/ns-img-428.png'">
-                        <div class="blog-content">
-                            <div class="blog-title">${blog.judul || 'Untitled'}</div>
-                            <div class="blog-meta">
-                                ${blog.penulis || 'Admin'} • ${blog.tanggal || 'No date'}
-                            </div>
-                            <div class="blog-desc">
-                                ${(blog.deskripsi || '').substring(0, 150)}...
-                            </div>
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error('API returned success: false');
+                }
+
+                const blogs = result.data || [];
+                
+                statusDiv.innerHTML = `<strong>Success!</strong> Loaded ${blogs.length} blog articles`;
+                statusDiv.className = 'blog-item';
+                
+                if (blogs.length === 0) {
+                    container.innerHTML = '<p>No blog articles found.</p>';
+                    return;
+                }
+
+                // Display first 5 blogs
+                const displayBlogs = blogs.slice(0, 5);
+                
+                container.innerHTML = displayBlogs.map(blog => `
+                    <div class="blog-item">
+                        <img src="${blog.gambar}" alt="${blog.judul}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                        <h3>${blog.judul}</h3>
+                        <div class="blog-meta">
+                            <strong>Author:</strong> ${blog.penulis} | 
+                            <strong>Date:</strong> ${blog.tanggal} | 
+                            <strong>Views:</strong> ${blog.views}
+                        </div>
+                        <div class="blog-description">
+                            ${blog.deskripsi.substring(0, 200)}...
                         </div>
                     </div>
                 `).join('');
-                
+
             } catch (error) {
-                statusEl.className = 'status error';
-                statusEl.textContent = `✗ Error: ${error.message}`;
-                console.error('API Error:', error);
+                statusDiv.className = 'error';
+                statusDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+                console.error('Error fetching blog data:', error);
             }
         }
 
+        // Run test when page loads
         testAPI();
     </script>
 </body>

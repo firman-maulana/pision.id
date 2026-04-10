@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Selectors</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-result {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success {
+            border-left: 4px solid #4caf50;
+        }
+        .error {
+            border-left: 4px solid #f44336;
+        }
+        .warning {
+            border-left: 4px solid #ff9800;
+        }
+        h2 {
+            margin-top: 0;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Blog API Selectors</h1>
+    <p>Halaman ini akan test apakah selector yang digunakan di blog-api.js benar.</p>
+    
+    <div id="results"></div>
+
+    <script>
+        function testSelectors() {
+            const results = document.getElementById('results');
+            let html = '';
+
+            // Test 1: Swiper wrapper
+            const swiperWrapper = document.querySelector('.blog-article-swiper .swiper-wrapper');
+            html += `
+                <div class="test-result ${swiperWrapper ? 'success' : 'warning'}">
+                    <h2>Test 1: Swiper Wrapper</h2>
+                    <p><strong>Selector:</strong> <code>.blog-article-swiper .swiper-wrapper</code></p>
+                    <p><strong>Result:</strong> ${swiperWrapper ? '✅ Found' : '⚠️ Not found (OK jika tidak ada swiper di halaman ini)'}</p>
+                </div>
+            `;
+
+            // Test 2: Grid sections
+            const allGrids = document.querySelectorAll('.grid.grid-cols-1.md\\:grid-cols-2.xl\\:grid-cols-3');
+            html += `
+                <div class="test-result ${allGrids.length > 0 ? 'success' : 'error'}">
+                    <h2>Test 2: Grid Sections</h2>
+                    <p><strong>Selector:</strong> <code>.grid.grid-cols-1.md:grid-cols-2.xl:grid-cols-3</code></p>
+                    <p><strong>Result:</strong> ${allGrids.length > 0 ? `✅ Found ${allGrids.length} grid(s)` : '❌ Not found'}</p>
+                    ${allGrids.length > 0 ? `<p><strong>Note:</strong> Grid pertama akan digunakan untuk blog cards</p>` : ''}
+                </div>
+            `;
+
+            // Test 3: Check current page
+            const currentPage = window.location.pathname;
+            const isHomepage = currentPage.includes('ai-software.html') || currentPage.endsWith('/');
+            const isBlogPage = currentPage.includes('ai-software-blog.html');
+            
+            html += `
+                <div class="test-result ${isHomepage || isBlogPage ? 'success' : 'warning'}">
+                    <h2>Test 3: Page Detection</h2>
+                    <p><strong>Current Path:</strong> <code>${currentPage}</code></p>
+                    <p><strong>Detected as:</strong> ${
+                        isHomepage ? '✅ Homepage (ai-software.html)' : 
+                        isBlogPage ? '✅ Blog Page (ai-software-blog.html)' : 
+                        '⚠️ Other page (blog API will not load)'
+                    }</p>
+                </div>
+            `;
+
+            // Test 4: API connectivity
+            html += `
+                <div class="test-result warning">
+                    <h2>Test 4: API Connectivity</h2>
+                    <p><strong>API URL:</strong> <code>https://adm.createch.id/getartikel</code></p>
+                    <p><strong>Status:</strong> <span id="api-status">Testing...</span></p>
+                </div>
+            `;
+
+            results.innerHTML = html;
+
+            // Test API
+            fetch('https://adm.createch.id/getartikel')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('api-status').innerHTML = `✅ Connected! Found ${data.data?.length || 0} articles`;
+                    document.querySelector('#api-status').parentElement.parentElement.classList.remove('warning');
+                    document.querySelector('#api-status').parentElement.parentElement.classList.add('success');
+                })
+                .catch(error => {
+                    document.getElementById('api-status').innerHTML = `❌ Error: ${error.message}`;
+                    document.querySelector('#api-status').parentElement.parentElement.classList.remove('warning');
+                    document.querySelector('#api-status').parentElement.parentElement.classList.add('error');
+                });
+        }
+
+        // Run tests when page loads
+        testSelectors();
+    </script>
+</body>
+</html>
