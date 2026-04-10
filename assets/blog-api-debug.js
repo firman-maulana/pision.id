@@ -65,7 +65,7 @@ function createSwiperSlide(article) {
           </div>
           <div>
             <h3 class="sm:text-heading-5 text-tagline-1 mb-2 font-normal">
-              <a href="ai-software-blog-details.html" aria-label="Read full article about ${title}">
+              <a href="/detail-blog" aria-label="Read full article about ${title}">
                 ${title}
               </a>
             </h3>
@@ -74,7 +74,7 @@ function createSwiperSlide(article) {
             </p>
           </div>
           <div>
-            <a href="ai-software-blog-details.html" class="btn btn-md btn-white hover:btn-primary dark:btn-transparent inline-block" aria-label="Read full article">
+            <a href="/detail-blog" class="btn btn-md btn-white hover:btn-primary dark:btn-transparent inline-block" aria-label="Read full article">
               <span>Read more</span>
             </a>
           </div>
@@ -110,7 +110,7 @@ function createBlogCard(article, delay = '0.3') {
           </div>
           <div>
             <h3 class="font-normal sm:text-heading-5 text-tagline-1 mb-2">
-              <a href="ai-software-blog-details.html" aria-label="Read more about ${title}">
+              <a href="/detail-blog" aria-label="Read more about ${title}">
                 ${title}
               </a>
             </h3>
@@ -119,7 +119,7 @@ function createBlogCard(article, delay = '0.3') {
             </p>
           </div>
           <div>
-            <a href="ai-software-blog-details.html" class="btn btn-md btn-white hover:btn-primary dark:btn-transparent inline-block absolute bottom-6" aria-label="Read full article">
+            <a href="/detail-blog" class="btn btn-md btn-white hover:btn-primary dark:btn-transparent inline-block absolute bottom-6" aria-label="Read full article">
               <span>Read more</span>
             </a>
           </div>
@@ -403,10 +403,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const currentPage = window.location.pathname;
   console.log('[Blog API] Current page:', currentPage);
   
-  if (currentPage.includes('ai-software.html') || currentPage.endsWith('/')) {
+  if (currentPage.includes('./') || currentPage.endsWith('/')) {
     console.log('[Blog API] Detected homepage, loading homepage blogs');
     loadHomepageBlogs();
-  } else if (currentPage.includes('ai-software-blog.html')) {
+  } else if (currentPage.includes('/blog')) {
     console.log('[Blog API] Detected blog page, loading blog page blogs');
     loadBlogPageBlogs();
   } else {
