@@ -105,9 +105,6 @@
   --color-ns-green: #c6f56f;
   --color-ns-red: #ffb9a2;
   --color-ns-cyan: #83e7ee;
-  --color-ns-blue: #83b4ff;
-  --color-ns-purple: #a585ff;
-  --color-ns-orange: #ffc2ad;
   --color-ns-green-light: #e8fbc6;
   --color-ns-cyan-light: #cdf5f8;
   --color-ns-yellow-light: #fdf7bc;
@@ -10259,21 +10256,9 @@ body {
     background-color: var(--color-ns-yellow-light);
   }
 
-  .bg-ns-blue {
-  background-color: var(--color-ns-blue);
-  }
-
-  .bg-ns-purple {
-  background-color: var(--color-ns-purple);
-  }
-
-  .bg-ns-orange {
-  background-color: var(--color-ns-orange);
-  }
-
-    .bg-primary-100 {
+  .bg-primary-100 {
     background-color: var(--color-primary-100);
-    }
+  }
 
   .bg-primary-100\/10 {
     background-color: #ece8ff1a;
